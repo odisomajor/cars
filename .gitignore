@@ -48,6 +48,12 @@ coverage/
 ._*
 .Spotlight-V100
 .Trashes
+
+# SSH Keys
+cardealership_key*
+digitalocean_key*
+*.pem
+*.ppk
 ehthumbs.db
 Thumbs.db
 
