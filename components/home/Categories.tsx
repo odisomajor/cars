@@ -1,0 +1,150 @@
+import Link from 'next/link'
+
+export default function Categories() {
+  const categories = [
+    {
+      name: 'SUVs',
+      count: '2,450+',
+      image: '🚙',
+      href: '/cars?category=suv',
+      description: 'Perfect for families and adventures'
+    },
+    {
+      name: 'Sedans',
+      count: '3,200+',
+      image: '🚗',
+      href: '/cars?category=sedan',
+      description: 'Comfortable and fuel-efficient'
+    },
+    {
+      name: 'Car Hire',
+      count: '180+',
+      image: '🔑',
+      href: '/hire',
+      description: 'Rent a car for your journey'
+    },
+    {
+      name: 'Hatchbacks',
+      count: '1,800+',
+      image: '🚕',
+      href: '/cars?category=hatchback',
+      description: 'Compact and city-friendly'
+    },
+    {
+      name: 'Pickup Trucks',
+      count: '950+',
+      image: '🛻',
+      href: '/cars?category=pickup',
+      description: 'Built for work and play'
+    },
+    {
+      name: 'Luxury Cars',
+      count: '650+',
+      image: '🏎️',
+      href: '/cars?category=luxury',
+      description: 'Premium vehicles for discerning buyers'
+    },
+    {
+      name: 'Commercial',
+      count: '420+',
+      image: '🚚',
+      href: '/cars?category=commercial',
+      description: 'Vans, trucks, and business vehicles'
+    }
+  ]
+
+  const popularBrands = [
+    { name: 'Toyota', count: '4,200+', logo: 'T' },
+    { name: 'Nissan', count: '2,800+', logo: 'N' },
+    { name: 'Honda', count: '1,900+', logo: 'H' },
+    { name: 'Mazda', count: '1,200+', logo: 'M' },
+    { name: 'Mercedes-Benz', count: '850+', logo: 'MB' },
+    { name: 'BMW', count: '720+', logo: 'BMW' },
+    { name: 'Mitsubishi', count: '680+', logo: 'Mit' },
+    { name: 'Subaru', count: '520+', logo: 'S' }
+  ]
+
+  return (
+    <section className="section-padding bg-white">
+      <div className="container-custom">
+        {/* Categories Section */}
+        <div className="mb-16">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl lg:text-4xl font-bold text-secondary-900 mb-4">
+              Browse by Category
+            </h2>
+            <p className="text-lg text-secondary-600 max-w-2xl mx-auto">
+              Find the perfect vehicle type that matches your lifestyle and needs
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {categories.map((category) => (
+              <Link
+                key={category.name}
+                href={category.href}
+                className="group card-hover p-6 text-center transition-all duration-300 hover:scale-105"
+              >
+                <div className="text-6xl mb-4 group-hover:scale-110 transition-transform duration-300">
+                  {category.image}
+                </div>
+                <h3 className="text-xl font-semibold text-secondary-900 mb-2 group-hover:text-primary-600 transition-colors">
+                  {category.name}
+                </h3>
+                <p className="text-secondary-600 text-sm mb-3">
+                  {category.description}
+                </p>
+                <div className="text-primary-600 font-semibold">
+                  {category.count} available
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+
+        {/* Popular Brands Section */}
+        <div>
+          <div className="text-center mb-12">
+            <h2 className="text-3xl lg:text-4xl font-bold text-secondary-900 mb-4">
+              Popular Brands
+            </h2>
+            <p className="text-lg text-secondary-600 max-w-2xl mx-auto">
+              Shop from the most trusted automotive brands in Kenya
+            </p>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
+            {popularBrands.map((brand) => (
+              <Link
+                key={brand.name}
+                href={`/cars?brand=${brand.name.toLowerCase()}`}
+                className="group card-hover p-4 text-center transition-all duration-300 hover:scale-105"
+              >
+                <div className="w-16 h-16 bg-gradient-to-br from-primary-500 to-primary-700 rounded-full flex items-center justify-center mx-auto mb-3 group-hover:shadow-lg transition-shadow">
+                  <span className="text-white font-bold text-sm">
+                    {brand.logo}
+                  </span>
+                </div>
+                <h3 className="font-semibold text-secondary-900 mb-1 group-hover:text-primary-600 transition-colors text-sm">
+                  {brand.name}
+                </h3>
+                <p className="text-xs text-secondary-600">
+                  {brand.count}
+                </p>
+              </Link>
+            ))}
+          </div>
+
+          <div className="text-center mt-8">
+            <Link
+              href="/brands"
+              className="btn-outline btn-lg"
+            >
+              View All Brands
+            </Link>
+          </div>
+        </div>
+      </div>
+    </section>
+  )
+}
