@@ -72,6 +72,9 @@ export default function ListingsManagementPage() {
   const [statusFilter, setStatusFilter] = useState('all');
   const [typeFilter, setTypeFilter] = useState('all');
   const [showBulkActions, setShowBulkActions] = useState(false);
+  const [bulkAction, setBulkAction] = useState<'activate' | 'deactivate' | 'delete' | 'feature' | ''>('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [bulkActionProgress, setBulkActionProgress] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [showDropdown, setShowDropdown] = useState<string | null>(null);
@@ -131,24 +134,53 @@ export default function ListingsManagementPage() {
   const handleBulkAction = async (action: string) => {
     if (selectedListings.length === 0) return;
 
+    setIsLoading(true);
+    setBulkActionProgress(0);
+    
     try {
-      const response = await fetch('/api/listings/bulk', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action,
-          listingIds: selectedListings
-        })
-      });
-
-      if (!response.ok) throw new Error('Bulk action failed');
+      // Process in batches for better performance
+      const batchSize = 10;
+      const batches = [];
+      for (let i = 0; i < selectedListings.length; i += batchSize) {
+        batches.push(selectedListings.slice(i, i + batchSize));
+      }
       
-      await fetchListings();
+      let processedCount = 0;
+      const results = [];
+      
+      for (const batch of batches) {
+        const response = await fetch('/api/listings/bulk', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action,
+            listingIds: batch
+          })
+        });
+        
+        if (response.ok) {
+          const result = await response.json();
+          results.push(result);
+          processedCount += batch.length;
+          setBulkActionProgress((processedCount / selectedListings.length) * 100);
+        } else {
+          throw new Error(`Failed to process batch: ${response.statusText}`);
+        }
+        
+        // Small delay to prevent overwhelming the server
+        await new Promise(resolve => setTimeout(resolve, 100));
+      }
+      
+      alert(`Successfully ${action}d ${selectedListings.length} listings`);
       setSelectedListings([]);
       setShowBulkActions(false);
+      await fetchListings();
     } catch (error) {
-      console.error('Error performing bulk action:', error);
-      alert('Failed to perform bulk action');
+      console.error('Bulk action error:', error);
+      alert(`Failed to ${action} listings. Please try again.`);
+    } finally {
+      setIsLoading(false);
+      setBulkActionProgress(0);
     }
   };
 
@@ -257,9 +289,10 @@ export default function ListingsManagementPage() {
                 </span>
                 <button
                   onClick={() => setShowBulkActions(!showBulkActions)}
-                  className="px-3 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+                  disabled={isLoading}
+                  className="px-3 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Bulk Actions
+                  {isLoading ? 'Processing...' : 'Bulk Actions'}
                 </button>
               </div>
             )}
@@ -271,28 +304,62 @@ export default function ListingsManagementPage() {
               <div className="flex flex-wrap gap-2">
                 <button
                   onClick={() => handleBulkAction('activate')}
-                  className="px-3 py-1 bg-green-100 text-green-800 rounded-md hover:bg-green-200 transition-colors text-sm"
+                  disabled={isLoading}
+                  className="px-3 py-1 bg-green-100 text-green-800 rounded-md hover:bg-green-200 transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Activate
                 </button>
                 <button
                   onClick={() => handleBulkAction('deactivate')}
-                  className="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-md hover:bg-yellow-200 transition-colors text-sm"
+                  disabled={isLoading}
+                  className="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-md hover:bg-yellow-200 transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Deactivate
                 </button>
                 <button
+                  onClick={() => handleBulkAction('feature')}
+                  disabled={isLoading}
+                  className="px-3 py-1 bg-blue-100 text-blue-800 rounded-md hover:bg-blue-200 transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Feature
+                </button>
+                <button
+                  onClick={() => handleBulkAction('unfeature')}
+                  disabled={isLoading}
+                  className="px-3 py-1 bg-purple-100 text-purple-800 rounded-md hover:bg-purple-200 transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Unfeature
+                </button>
+                <button
                   onClick={() => handleBulkAction('archive')}
-                  className="px-3 py-1 bg-gray-100 text-gray-800 rounded-md hover:bg-gray-200 transition-colors text-sm"
+                  disabled={isLoading}
+                  className="px-3 py-1 bg-gray-100 text-gray-800 rounded-md hover:bg-gray-200 transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Archive
                 </button>
                 <button
                   onClick={() => handleBulkAction('delete')}
-                  className="px-3 py-1 bg-red-100 text-red-800 rounded-md hover:bg-red-200 transition-colors text-sm"
+                  disabled={selectedListings.length === 0 || isLoading}
+                  className="px-3 py-1 bg-red-100 text-red-800 rounded-md hover:bg-red-200 transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Delete
                 </button>
+              </div>
+              <div className="mt-2 flex items-center justify-between">
+                <div className="text-xs text-gray-500">
+                  Selected {selectedListings.length} listing{selectedListings.length !== 1 ? 's' : ''}
+                </div>
+                {isLoading && (
+                  <div className="flex items-center space-x-2">
+                    <div className="w-32 bg-gray-200 rounded-full h-2">
+                      <div 
+                        className="bg-blue-600 h-2 rounded-full transition-all duration-300" 
+                        style={{ width: `${bulkActionProgress}%` }}
+                      ></div>
+                    </div>
+                    <span className="text-xs text-gray-500">{Math.round(bulkActionProgress)}%</span>
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -309,7 +376,8 @@ export default function ListingsManagementPage() {
                       type="checkbox"
                       checked={selectedListings.length === listings.length && listings.length > 0}
                       onChange={handleSelectAll}
-                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                      disabled={isLoading}
+                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
                     />
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">

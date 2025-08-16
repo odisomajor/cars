@@ -18,6 +18,7 @@ import {
   MapPin,
   Clock
 } from 'lucide-react'
+import ExpirationManager from '@/components/listings/ExpirationManager'
 
 interface Listing {
   id: string
@@ -38,21 +39,72 @@ interface Listing {
 
 interface DashboardStats {
   activeListings: number
+  totalListings: number
+  rentalListings: number
   totalViews: number
   savedCars: number
+  totalBookings: number
   reviews: number
+  averageRating: number
+  monthlyRevenue: number
+}
+
+interface RecentListing {
+  id: string
+  title: string
+  make: string
+  model: string
+  year: number
+  price: number
+  images: string[]
+  status: string
+  listingType: string
+  views: number
+  createdAt: string
+}
+
+interface RecentBooking {
+  id: string
+  startDate: string
+  endDate: string
+  totalAmount: number
+  status: string
+  rentalListing: {
+    title: string
+    make: string
+    model: string
+    year: number
+  }
+}
+
+interface DashboardData {
+  user: {
+    id: string
+    name: string
+    email: string
+    role: string
+    createdAt: string
+    emailVerified: boolean
+    phoneVerified: boolean
+    isVerified: boolean
+  }
+  stats: DashboardStats
+  recentListings: RecentListing[]
+  recentRentalListings: RecentListing[]
+  recentBookings: RecentBooking[]
+  listingsByStatus: {
+    ACTIVE: number
+    PENDING: number
+    SOLD: number
+    EXPIRED: number
+  }
 }
 
 export default function DashboardPage() {
   const { user, isAuthenticated, isLoading } = useAuth(true) // Require authentication
-  const [listings, setListings] = useState<Listing[]>([])
-  const [stats, setStats] = useState<DashboardStats>({
-    activeListings: 0,
-    totalViews: 0,
-    savedCars: 0,
-    reviews: 0
-  })
+  const [dashboardData, setDashboardData] = useState<DashboardData | null>(null)
   const [loadingData, setLoadingData] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     if (isAuthenticated && user) {
@@ -62,34 +114,18 @@ export default function DashboardPage() {
 
   const fetchUserData = async () => {
     try {
-      // Fetch user listings
-      const listingsResponse = await fetch('/api/user/listings')
-      if (listingsResponse.ok) {
-        const listingsData = await listingsResponse.json()
-        setListings(listingsData.listings || [])
-        
-        // Calculate stats
-        const activeListings = listingsData.listings?.filter((l: Listing) => l.status === 'ACTIVE').length || 0
-        const totalViews = listingsData.listings?.reduce((sum: number, l: Listing) => sum + l.views, 0) || 0
-        
-        setStats(prev => ({
-          ...prev,
-          activeListings,
-          totalViews
-        }))
+      setError(null)
+      const response = await fetch('/api/user/dashboard')
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch dashboard data')
       }
       
-      // Fetch favorites count
-      const favoritesResponse = await fetch('/api/user/favorites')
-      if (favoritesResponse.ok) {
-        const favoritesData = await favoritesResponse.json()
-        setStats(prev => ({
-          ...prev,
-          savedCars: favoritesData.count || 0
-        }))
-      }
+      const data = await response.json()
+      setDashboardData(data)
     } catch (error) {
-      console.error('Error fetching user data:', error)
+      console.error('Error fetching dashboard data:', error)
+      setError(error instanceof Error ? error.message : 'Failed to load dashboard data')
     } finally {
       setLoadingData(false)
     }
@@ -104,11 +140,8 @@ export default function DashboardPage() {
       })
       
       if (response.ok) {
-        setListings(prev => prev.filter(l => l.id !== listingId))
-        setStats(prev => ({
-          ...prev,
-          activeListings: prev.activeListings - 1
-        }))
+        // Refresh dashboard data after deletion
+        await fetchUserData()
       } else {
         alert('Failed to delete listing')
       }
@@ -155,83 +188,198 @@ export default function DashboardPage() {
                 <p className="text-gray-600 mt-1">
                   Manage your listings, favorites, and account settings
                 </p>
+                {dashboardData && !dashboardData.user.isVerified && (
+                  <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                    <p className="text-sm text-yellow-800">
+                      <strong>Account verification needed:</strong> Please verify your email
+                      {!dashboardData.user.phoneVerified && ' and phone'} to unlock all features.
+                      <Link href="/profile" className="ml-2 text-yellow-900 underline hover:no-underline">
+                        Complete verification →
+                      </Link>
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
           </div>
         </div>
 
         {/* Quick Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <div className="flex items-center justify-between">
+        {error ? (
+          <div className="bg-red-50 border border-red-200 rounded-lg p-6 mb-8">
+            <div className="flex items-center space-x-3">
+              <div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
+                <span className="text-red-600 text-sm font-bold">!</span>
+              </div>
               <div>
-                <p className="text-sm font-medium text-gray-600">Active Listings</p>
-                <p className="text-3xl font-bold text-gray-900">{stats.activeListings}</p>
+                <h3 className="text-red-800 font-medium">Error loading dashboard</h3>
+                <p className="text-red-600 text-sm mt-1">{error}</p>
+                <button
+                  onClick={fetchUserData}
+                  className="mt-2 text-sm text-red-700 underline hover:no-underline"
+                >
+                  Try again
+                </button>
               </div>
-              <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                <Car className="w-6 h-6 text-blue-600" />
-              </div>
-            </div>
-            <div className="mt-4">
-              <Link
-                href="/create-listing"
-                className="text-sm text-primary-600 hover:text-primary-700 font-medium"
-              >
-                Create new listing →
-              </Link>
             </div>
           </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">Active Listings</p>
+                  <p className="text-3xl font-bold text-gray-900">
+                    {dashboardData?.stats.activeListings || 0}
+                  </p>
+                </div>
+                <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                  <Car className="w-6 h-6 text-blue-600" />
+                </div>
+              </div>
+              <div className="mt-4">
+                <Link
+                  href="/create-listing"
+                  className="text-sm text-primary-600 hover:text-primary-700 font-medium"
+                >
+                  Create new listing →
+                </Link>
+              </div>
+            </div>
 
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Saved Cars</p>
-                <p className="text-3xl font-bold text-gray-900">{stats.savedCars}</p>
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">Total Views</p>
+                  <p className="text-3xl font-bold text-gray-900">
+                    {dashboardData?.stats.totalViews || 0}
+                  </p>
+                </div>
+                <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                  <Eye className="w-6 h-6 text-green-600" />
+                </div>
               </div>
-              <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
-                <Heart className="w-6 h-6 text-red-600" />
+              <div className="mt-4">
+                <span className="text-sm text-gray-500">On your listings</span>
               </div>
             </div>
-            <div className="mt-4">
-              <Link
-                href="/favorites"
-                className="text-sm text-primary-600 hover:text-primary-700 font-medium"
-              >
-                View favorites →
-              </Link>
-            </div>
-          </div>
 
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Total Views</p>
-                <p className="text-3xl font-bold text-gray-900">{stats.totalViews}</p>
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">Monthly Revenue</p>
+                  <p className="text-3xl font-bold text-gray-900">
+                    ${dashboardData?.stats.monthlyRevenue?.toLocaleString() || 0}
+                  </p>
+                </div>
+                <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                  <DollarSign className="w-6 h-6 text-green-600" />
+                </div>
               </div>
-              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                <Eye className="w-6 h-6 text-green-600" />
+              <div className="mt-4">
+                <span className="text-sm text-gray-500">This month</span>
               </div>
             </div>
-            <div className="mt-4">
-              <span className="text-sm text-gray-500">On your listings</span>
-            </div>
-          </div>
 
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Reviews</p>
-                <p className="text-3xl font-bold text-gray-900">{stats.reviews}</p>
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">Reviews</p>
+                  <p className="text-3xl font-bold text-gray-900">
+                    {dashboardData?.stats.reviews || 0}
+                  </p>
+                </div>
+                <div className="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
+                  <Star className="w-6 h-6 text-yellow-600" />
+                </div>
               </div>
-              <div className="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
-                <Star className="w-6 h-6 text-yellow-600" />
+              <div className="mt-4">
+                <span className="text-sm text-gray-500">
+                  Average: {dashboardData?.stats.averageRating ? 
+                    `${dashboardData.stats.averageRating.toFixed(1)}/5` : 'N/A'}
+                </span>
               </div>
-            </div>
-            <div className="mt-4">
-              <span className="text-sm text-gray-500">Average rating: N/A</span>
             </div>
           </div>
-        </div>
+        )}
+
+        {/* Additional Stats Row */}
+        {dashboardData && (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">Saved Cars</p>
+                  <p className="text-3xl font-bold text-gray-900">
+                    {dashboardData.stats.savedCars}
+                  </p>
+                </div>
+                <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
+                  <Heart className="w-6 h-6 text-red-600" />
+                </div>
+              </div>
+              <div className="mt-4">
+                <Link
+                  href="/favorites"
+                  className="text-sm text-primary-600 hover:text-primary-700 font-medium"
+                >
+                  View favorites →
+                </Link>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">Rental Bookings</p>
+                  <p className="text-3xl font-bold text-gray-900">
+                    {dashboardData.stats.totalBookings}
+                  </p>
+                </div>
+                <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                  <Calendar className="w-6 h-6 text-purple-600" />
+                </div>
+              </div>
+              <div className="mt-4">
+                <Link
+                  href="/bookings"
+                  className="text-sm text-primary-600 hover:text-primary-700 font-medium"
+                >
+                  View bookings →
+                </Link>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">Rental Listings</p>
+                  <p className="text-3xl font-bold text-gray-900">
+                    {dashboardData.stats.rentalListings}
+                  </p>
+                </div>
+                <div className="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center">
+                  <Car className="w-6 h-6 text-indigo-600" />
+                </div>
+              </div>
+              <div className="mt-4">
+                <Link
+                  href="/create-listing?type=rental"
+                  className="text-sm text-primary-600 hover:text-primary-700 font-medium"
+                >
+                  Create rental →
+                </Link>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Listing Expiration Management */}
+        {dashboardData && (
+          <div className="mb-8">
+            <ExpirationManager userId={dashboardData.user.id} />
+          </div>
+        )}
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Quick Actions */}
@@ -292,6 +440,21 @@ export default function DashboardPage() {
                     <p className="text-sm text-gray-600">Find your next car</p>
                   </div>
                 </Link>
+
+                {user?.role === 'DEALER' || user?.role === 'RENTAL_COMPANY' ? (
+                  <Link
+                    href="/dashboard/fleet"
+                    className="flex items-center space-x-3 p-4 bg-green-50 hover:bg-green-100 rounded-lg transition-colors group"
+                  >
+                    <div className="w-10 h-10 bg-green-600 rounded-lg flex items-center justify-center group-hover:bg-green-700 transition-colors">
+                      <Car className="w-5 h-5 text-white" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-gray-900">Fleet Management</p>
+                      <p className="text-sm text-gray-600">Manage rental fleet</p>
+                    </div>
+                  </Link>
+                ) : null}
               </div>
             </div>
           </div>
@@ -323,7 +486,7 @@ export default function DashboardPage() {
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600 mx-auto"></div>
                     <p className="text-gray-600 mt-2">Loading your listings...</p>
                   </div>
-                ) : listings.length === 0 ? (
+                ) : !dashboardData || dashboardData.recentListings.length === 0 ? (
                   <div className="text-center py-12">
                     <Car className="w-12 h-12 text-gray-400 mx-auto mb-4" />
                     <h3 className="text-lg font-medium text-gray-900 mb-2">No listings yet</h3>
@@ -340,7 +503,7 @@ export default function DashboardPage() {
                   </div>
                 ) : (
                   <div className="space-y-4">
-                    {listings.slice(0, 3).map((listing) => (
+                    {dashboardData.recentListings.map((listing) => (
                       <div key={listing.id} className="flex items-center space-x-4 p-4 border border-gray-200 rounded-lg hover:bg-gray-50">
                         <div className="w-16 h-16 bg-gray-200 rounded-lg overflow-hidden flex-shrink-0">
                           {listing.images.length > 0 ? (
@@ -368,9 +531,10 @@ export default function DashboardPage() {
                               <Eye className="w-3 h-3 mr-1" />
                               {listing.views} views
                             </span>
-                            <span className="text-xs text-gray-500 flex items-center">
-                              <MapPin className="w-3 h-3 mr-1" />
-                              {listing.location}
+                            <span className={`px-2 py-1 text-xs rounded-full ${
+                              listing.listingType === 'SALE' ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800'
+                            }`}>
+                              {listing.listingType === 'SALE' ? 'For Sale' : 'For Rent'}
                             </span>
                           </div>
                         </div>
@@ -399,13 +563,13 @@ export default function DashboardPage() {
                         </div>
                       </div>
                     ))}
-                    {listings.length > 3 && (
+                    {dashboardData.stats.totalListings > dashboardData.recentListings.length && (
                       <div className="text-center pt-4">
                         <Link
                           href="/my-listings"
                           className="text-primary-600 hover:text-primary-700 font-medium"
                         >
-                          View all {listings.length} listings →
+                          View all {dashboardData.stats.totalListings} listings →
                         </Link>
                       </div>
                     )}
@@ -414,19 +578,63 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            {/* Recent Activity */}
+            {/* Recent Bookings */}
             <div className="bg-white rounded-lg shadow-sm border border-gray-200">
               <div className="px-6 py-4 border-b border-gray-200">
-                <h2 className="text-lg font-semibold text-gray-900">Recent Activity</h2>
+                <h2 className="text-lg font-semibold text-gray-900">Recent Bookings</h2>
               </div>
               <div className="p-6">
-                <div className="text-center py-12">
-                  <TrendingUp className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">No recent activity</h3>
-                  <p className="text-gray-600">
-                    Your recent actions and updates will appear here
-                  </p>
-                </div>
+                {!dashboardData || dashboardData.recentBookings.length === 0 ? (
+                  <div className="text-center py-12">
+                    <Calendar className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">No recent bookings</h3>
+                    <p className="text-gray-600">
+                      Your rental bookings will appear here
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {dashboardData.recentBookings.map((booking) => (
+                      <div key={booking.id} className="flex items-center space-x-4 p-4 border border-gray-200 rounded-lg">
+                        <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                          <Calendar className="w-6 h-6 text-purple-600" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h4 className="font-medium text-gray-900 truncate">
+                            {booking.rentalListing.year} {booking.rentalListing.make} {booking.rentalListing.model}
+                          </h4>
+                          <p className="text-sm text-gray-600">
+                            {new Date(booking.startDate).toLocaleDateString()} - {new Date(booking.endDate).toLocaleDateString()}
+                          </p>
+                          <div className="flex items-center space-x-4 mt-1">
+                            <span className="text-sm font-medium text-primary-600">
+                              ${booking.totalAmount.toLocaleString()}
+                            </span>
+                            <span className={`px-2 py-1 text-xs rounded-full ${
+                              booking.status === 'CONFIRMED' 
+                                ? 'bg-green-100 text-green-800'
+                                : booking.status === 'PENDING'
+                                ? 'bg-yellow-100 text-yellow-800'
+                                : 'bg-gray-100 text-gray-800'
+                            }`}>
+                              {booking.status.toLowerCase()}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                    {dashboardData.stats.totalBookings > dashboardData.recentBookings.length && (
+                      <div className="text-center pt-4">
+                        <Link
+                          href="/bookings"
+                          className="text-primary-600 hover:text-primary-700 font-medium"
+                        >
+                          View all {dashboardData.stats.totalBookings} bookings →
+                        </Link>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -446,17 +654,42 @@ export default function DashboardPage() {
                 <div>
                   <h3 className="font-medium text-gray-900">Account Active</h3>
                   <p className="text-sm text-gray-600">
-                    Member since {user.createdAt ? new Date(user.createdAt).toLocaleDateString('en-US', {
+                    Member since {dashboardData?.user.createdAt ? new Date(dashboardData.user.createdAt).toLocaleDateString('en-US', {
+                      year: 'numeric',
+                      month: 'long'
+                    }) : user.createdAt ? new Date(user.createdAt).toLocaleDateString('en-US', {
                       year: 'numeric',
                       month: 'long'
                     }) : 'Unknown'}
                   </p>
+                  {dashboardData && (
+                    <div className="flex items-center space-x-4 mt-2">
+                      <span className={`inline-flex items-center px-2 py-1 text-xs rounded-full ${
+                        dashboardData.user.emailVerified ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                      }`}>
+                        Email {dashboardData.user.emailVerified ? 'Verified' : 'Unverified'}
+                      </span>
+                      <span className={`inline-flex items-center px-2 py-1 text-xs rounded-full ${
+                        dashboardData.user.phoneVerified ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                      }`}>
+                        Phone {dashboardData.user.phoneVerified ? 'Verified' : 'Unverified'}
+                      </span>
+                    </div>
+                  )}
                 </div>
               </div>
               <div className="text-right">
-                <span className="inline-block px-3 py-1 text-sm bg-green-100 text-green-800 rounded-full">
-                  {user.role?.toLowerCase().replace('_', ' ')}
-                </span>
+                <div className="text-right space-y-2">
+                  <span className="inline-block px-3 py-1 text-sm bg-green-100 text-green-800 rounded-full">
+                    {(dashboardData?.user.role || user.role)?.toLowerCase().replace('_', ' ')}
+                  </span>
+                  {dashboardData && (
+                    <div className="text-sm text-gray-600">
+                      <div>Total Listings: {dashboardData.stats.totalListings}</div>
+                      <div>Active: {dashboardData.listingsByStatus.ACTIVE} | Sold: {dashboardData.listingsByStatus.SOLD}</div>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </div>

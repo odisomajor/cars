@@ -14,16 +14,15 @@ if %errorlevel% == 0 (
     goto :automated
 ) else (
     echo PuTTY plink not found. Checking for OpenSSH...
-    ssh -V 2>nul
-    if %errorlevel% == 0 (
-        echo OpenSSH found! Using alternative method...
-        goto :openssh
-    ) else (
+    ssh -V >nul 2>&1
+    if errorlevel 1 (
         echo Neither PuTTY nor OpenSSH found.
         echo Please install PuTTY first by running: install-putty.bat
         pause
         exit /b 1
     )
+    echo OpenSSH found! Using alternative method...
+    goto :openssh
 )
 
 :automated
@@ -91,9 +90,8 @@ echo npm install -g pm2 >> temp_deploy.sh
 echo ufw allow ssh ^&^& ufw allow 'Nginx Full' ^&^& ufw --force enable >> temp_deploy.sh
 echo mkdir -p /var/www/cardealership >> temp_deploy.sh
 echo cd /var/www/cardealership >> temp_deploy.sh
-echo git clone https://github.com/yourusername/CarDealership.git . >> temp_deploy.sh
+echo git clone https://github.com/odisomajor/cars.git . >> temp_deploy.sh
 echo chown -R www-data:www-data /var/www/cardealership >> temp_deploy.sh
-echo cd /var/www/cardealership >> temp_deploy.sh
 echo npm install >> temp_deploy.sh
 echo mkdir -p public/uploads >> temp_deploy.sh
 echo chown -R www-data:www-data public/uploads >> temp_deploy.sh

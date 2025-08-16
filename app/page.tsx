@@ -59,24 +59,24 @@ export default function HomePage() {
                   />
                   
                   {/* Quick Stats */}
-                  <div className="card p-6">
-                    <h3 className="text-lg font-semibold mb-4">Marketplace Stats</h3>
-                    <div className="space-y-3">
+                  <div className="card p-4">
+                    <h3 className="text-base font-semibold mb-3">Marketplace Stats</h3>
+                    <div className="space-y-2">
                       <div className="flex justify-between">
-                        <span className="text-secondary-600">Total Cars</span>
-                        <span className="font-semibold">12,450+</span>
+                        <span className="text-secondary-600 text-sm">Total Cars</span>
+                        <span className="font-semibold text-sm">12,450+</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-secondary-600">Active Dealers</span>
-                        <span className="font-semibold">850+</span>
+                        <span className="text-secondary-600 text-sm">Active Dealers</span>
+                        <span className="font-semibold text-sm">850+</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-secondary-600">Cities Covered</span>
-                        <span className="font-semibold">47</span>
+                        <span className="text-secondary-600 text-sm">Cities Covered</span>
+                        <span className="font-semibold text-sm">47</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-secondary-600">Happy Customers</span>
-                        <span className="font-semibold">25,000+</span>
+                        <span className="text-secondary-600 text-sm">Happy Customers</span>
+                        <span className="font-semibold text-sm">25,000+</span>
                       </div>
                     </div>
                   </div>

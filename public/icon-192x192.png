@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="192" height="192" viewBox="0 0 192 192">
+  <rect width="192" height="192" fill="#3b82f6" rx="24"/>
+  <g transform="translate(32, 32)">
+    <!-- Car icon -->
+    <path d="M120 72H104L96 48H32L24 72H8C3.6 72 0 75.6 0 80V120C0 124.4 3.6 128 8 128H16C16 137.6 23.6 145.2 33.2 145.2S50.4 137.6 50.4 128H77.6C77.6 137.6 85.2 145.2 94.8 145.2S112 137.6 112 128H120C124.4 128 128 124.4 128 120V80C128 75.6 124.4 72 120 72ZM33.2 136C28.8 136 25.2 132.4 25.2 128S28.8 120 33.2 120S41.2 123.6 41.2 128S37.6 136 33.2 136ZM94.8 136C90.4 136 86.8 132.4 86.8 128S90.4 120 94.8 120S102.8 123.6 102.8 128S99.2 136 94.8 136ZM16 104V88H112V104H16Z" fill="white"/>
+    <!-- Kenya flag colors accent -->
+    <rect x="8" y="8" width="112" height="4" fill="#000000"/>
+    <rect x="8" y="12" width="112" height="4" fill="#ff0000"/>
+    <rect x="8" y="16" width="112" height="4" fill="#00ff00"/>
+  </g>
+  <text x="96" y="170" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="14" font-weight="bold">CarMarket KE</text>
+</svg>

@@ -89,20 +89,20 @@ export default function Header() {
   return (
     <>
       {/* Top Bar */}
-      <div className="bg-secondary-900 text-white py-2 hidden md:block">
+      <div className="bg-secondary-900 text-white py-1.5 hidden md:block">
         <div className="container mx-auto px-4">
-          <div className="flex items-center justify-between text-sm">
-            <div className="flex items-center space-x-6">
-              <div className="flex items-center space-x-2">
-                <Phone className="w-4 h-4" />
+          <div className="flex items-center justify-between text-xs">
+            <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-1.5">
+                <Phone className="w-3 h-3" />
                 <span>+254 700 123 456</span>
               </div>
-              <div className="flex items-center space-x-2">
-                <MapPin className="w-4 h-4" />
+              <div className="flex items-center space-x-1.5">
+                <MapPin className="w-3 h-3" />
                 <span>Nairobi, Kenya</span>
               </div>
             </div>
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-3">
               <Link href="/help" className="hover:text-primary-400 transition-colors">
                 Help Center
               </Link>
@@ -117,14 +117,14 @@ export default function Header() {
       {/* Main Header */}
       <header className="bg-white shadow-md sticky top-0 z-40">
         <div className="container mx-auto px-4">
-          <div className="flex items-center justify-between h-16">
+          <div className="flex items-center justify-between h-14">
             {/* Logo */}
             <Link href="/" className="flex items-center space-x-2">
-              <div className="w-10 h-10 bg-primary-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-xl">🚗</span>
+              <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center">
+                <span className="text-white font-bold text-lg">🚗</span>
               </div>
               <div>
-                <h1 className="text-xl font-bold text-secondary-900">
+                <h1 className="text-lg font-bold text-secondary-900">
                   Kenya Cars
                 </h1>
                 <p className="text-xs text-secondary-500 -mt-1">
@@ -247,52 +247,52 @@ export default function Header() {
 
                     {/* Authenticated User Dropdown */}
                     {isUserMenuOpen && (
-                      <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-large border border-secondary-200 py-2 z-50">
-                        <div className="px-4 py-2 border-b border-secondary-200">
+                      <div className="absolute right-0 mt-2 w-52 bg-white rounded-lg shadow-large border border-secondary-200 py-1.5 z-50">
+                        <div className="px-3 py-2 border-b border-secondary-200">
                           <p className="text-sm font-medium text-secondary-900">{user?.name}</p>
                           <p className="text-xs text-secondary-500">{user?.email}</p>
-                          <span className="inline-block mt-1 px-2 py-1 text-xs bg-primary-100 text-primary-800 rounded-full">
+                          <span className="inline-block mt-1 px-2 py-0.5 text-xs bg-primary-100 text-primary-800 rounded-full">
                             {user?.role?.toLowerCase().replace('_', ' ')}
                           </span>
                         </div>
                         <Link
                           href="/dashboard"
-                          className="block px-4 py-2 text-secondary-700 hover:bg-secondary-50 transition-colors"
+                          className="block px-3 py-1.5 text-sm text-secondary-700 hover:bg-secondary-50 transition-colors"
                           onClick={() => setIsUserMenuOpen(false)}
                         >
                           My Dashboard
                         </Link>
                         <Link
                           href="/profile"
-                          className="block px-4 py-2 text-secondary-700 hover:bg-secondary-50 transition-colors"
+                          className="block px-3 py-1.5 text-sm text-secondary-700 hover:bg-secondary-50 transition-colors"
                           onClick={() => setIsUserMenuOpen(false)}
                         >
                           My Profile
                         </Link>
                         <Link
                           href="/my-listings"
-                          className="block px-4 py-2 text-secondary-700 hover:bg-secondary-50 transition-colors"
+                          className="block px-3 py-1.5 text-sm text-secondary-700 hover:bg-secondary-50 transition-colors"
                           onClick={() => setIsUserMenuOpen(false)}
                         >
                           My Listings
                         </Link>
                         <Link
                           href="/favorites"
-                          className="block px-4 py-2 text-secondary-700 hover:bg-secondary-50 transition-colors"
+                          className="block px-3 py-1.5 text-sm text-secondary-700 hover:bg-secondary-50 transition-colors"
                           onClick={() => setIsUserMenuOpen(false)}
                         >
                           Saved Cars
                         </Link>
                         <Link
                           href="/bookings"
-                          className="block px-4 py-2 text-secondary-700 hover:bg-secondary-50 transition-colors"
+                          className="block px-3 py-1.5 text-sm text-secondary-700 hover:bg-secondary-50 transition-colors"
                           onClick={() => setIsUserMenuOpen(false)}
                         >
                           My Bookings
                         </Link>
                         <Link
                           href="/settings"
-                          className="block px-4 py-2 text-secondary-700 hover:bg-secondary-50 transition-colors"
+                          className="block px-3 py-1.5 text-sm text-secondary-700 hover:bg-secondary-50 transition-colors"
                           onClick={() => setIsUserMenuOpen(false)}
                         >
                           Settings
@@ -300,21 +300,21 @@ export default function Header() {
                         {user?.role === 'ADMIN' && (
                           <Link
                             href="/admin"
-                            className="block px-4 py-2 text-secondary-700 hover:bg-secondary-50 transition-colors"
+                            className="block px-3 py-1.5 text-sm text-secondary-700 hover:bg-secondary-50 transition-colors"
                             onClick={() => setIsUserMenuOpen(false)}
                           >
                             Admin Dashboard
                           </Link>
                         )}
-                        <hr className="my-2 border-secondary-200" />
+                        <hr className="my-1.5 border-secondary-200" />
                         <button
                           onClick={() => {
                             signOut({ callbackUrl: '/' })
                             setIsUserMenuOpen(false)
                           }}
-                          className="w-full text-left px-4 py-2 text-red-600 hover:bg-red-50 transition-colors flex items-center space-x-2"
+                          className="w-full text-left px-3 py-1.5 text-sm text-red-600 hover:bg-red-50 transition-colors flex items-center space-x-2"
                         >
-                          <LogOut className="w-4 h-4" />
+                          <LogOut className="w-3 h-3" />
                           <span>Sign Out</span>
                         </button>
                       </div>

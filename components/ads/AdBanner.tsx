@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 interface AdBannerProps {
   type: 'header' | 'sidebar' | 'footer'
@@ -11,8 +11,12 @@ interface AdBannerProps {
 export default function AdBanner({ type, className = '', placeholder }: AdBannerProps) {
   const adRef = useRef<HTMLDivElement>(null)
   const isAdLoaded = useRef(false)
+  const [isProduction, setIsProduction] = useState(false)
 
   useEffect(() => {
+    // Set production mode on client side to avoid hydration mismatch
+    setIsProduction(process.env.NODE_ENV === 'production')
+    
     // Initialize Google AdSense ads when component mounts
     try {
       if (typeof window !== 'undefined' && 
@@ -38,7 +42,7 @@ export default function AdBanner({ type, className = '', placeholder }: AdBanner
         return {
           'data-ad-slot': 'YOUR_HEADER_AD_SLOT_ID',
           'data-ad-format': 'horizontal',
-          style: { display: 'block', width: '728px', height: '90px' }
+          style: { display: 'block', width: '728px', height: '60px' }
         }
       case 'sidebar':
         return {
@@ -50,7 +54,7 @@ export default function AdBanner({ type, className = '', placeholder }: AdBanner
         return {
           'data-ad-slot': 'YOUR_FOOTER_AD_SLOT_ID',
           'data-ad-format': 'horizontal',
-          style: { display: 'block', width: '728px', height: '90px' }
+          style: { display: 'block', width: '728px', height: '60px' }
         }
       default:
         return {
@@ -66,13 +70,13 @@ export default function AdBanner({ type, className = '', placeholder }: AdBanner
   return (
     <div ref={adRef} className={`flex justify-center ${className}`}>
       {/* Development/Preview Mode - Show placeholder */}
-      {process.env.NODE_ENV === 'development' ? (
+      {!isProduction ? (
         <div 
-          className="ad-banner flex items-center justify-center text-center p-4"
+          className="ad-banner flex items-center justify-center text-center p-2"
           style={adConfig.style}
         >
           <div>
-            <div className="text-secondary-500 font-medium mb-1">
+            <div className="text-secondary-500 font-medium mb-1 text-sm">
               {placeholder || 'Advertisement'}
             </div>
             <div className="text-xs text-secondary-400">
@@ -106,8 +110,12 @@ export function ResponsiveAdBanner({
 }) {
   const adRef = useRef<HTMLDivElement>(null)
   const isAdLoaded = useRef(false)
+  const [isProduction, setIsProduction] = useState(false)
 
   useEffect(() => {
+    // Set production mode on client side to avoid hydration mismatch
+    setIsProduction(process.env.NODE_ENV === 'production')
+    
     try {
       if (typeof window !== 'undefined' && 
           (window as any).adsbygoogle && 
@@ -128,10 +136,10 @@ export function ResponsiveAdBanner({
 
   return (
     <div ref={adRef} className={`flex justify-center ${className}`}>
-      {process.env.NODE_ENV === 'development' ? (
-        <div className="ad-banner w-full h-32 flex items-center justify-center text-center p-4">
+      {!isProduction ? (
+        <div className="ad-banner w-full h-20 flex items-center justify-center text-center p-2">
           <div>
-            <div className="text-secondary-500 font-medium mb-1">
+            <div className="text-secondary-500 font-medium mb-1 text-sm">
               {placeholder}
             </div>
             <div className="text-xs text-secondary-400">

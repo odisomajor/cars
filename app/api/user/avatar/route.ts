@@ -3,8 +3,10 @@ import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { writeFile, mkdir } from 'fs/promises'
+import { existsSync } from 'fs'
 import { join } from 'path'
 import { v4 as uuidv4 } from 'uuid'
+import sharp from 'sharp'
 
 export async function POST(request: NextRequest) {
   try {
@@ -68,24 +70,60 @@ export async function POST(request: NextRequest) {
     const fileName = `${uuidv4()}.${fileExtension}`
     const filePath = join(uploadsDir, fileName)
     
-    // Save file
+    // Process and optimize image with Sharp
     const bytes = await file.arrayBuffer()
     const buffer = Buffer.from(bytes)
-    await writeFile(filePath, buffer)
+    
+    // Create optimized versions
+    const optimizedBuffer = await sharp(buffer)
+      .resize(400, 400, { 
+        fit: 'cover',
+        position: 'center'
+      })
+      .jpeg({ 
+        quality: 85,
+        progressive: true
+      })
+      .toBuffer()
+    
+    // Create thumbnail
+    const thumbnailBuffer = await sharp(buffer)
+      .resize(150, 150, { 
+        fit: 'cover',
+        position: 'center'
+      })
+      .jpeg({ 
+        quality: 80,
+        progressive: true
+      })
+      .toBuffer()
+    
+    // Save optimized image
+    await writeFile(filePath, optimizedBuffer)
+    
+    // Save thumbnail
+    const thumbnailFileName = `thumb_${fileName}`
+    const thumbnailPath = join(uploadsDir, thumbnailFileName)
+    await writeFile(thumbnailPath, thumbnailBuffer)
     
     const avatarUrl = `/uploads/avatars/${fileName}`
+    const thumbnailUrl = `/uploads/avatars/${thumbnailFileName}`
 
     // Update or create user profile with avatar
     if (user.profile) {
       await prisma.profile.update({
         where: { userId: user.id },
-        data: { avatar: avatarUrl }
+        data: { 
+          avatar: avatarUrl,
+          avatarThumbnail: thumbnailUrl
+        }
       })
     } else {
       await prisma.profile.create({
         data: {
           userId: user.id,
-          avatar: avatarUrl
+          avatar: avatarUrl,
+          avatarThumbnail: thumbnailUrl
         }
       })
     }
@@ -98,7 +136,9 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       message: 'Avatar uploaded successfully',
-      avatarUrl
+      avatarUrl,
+      thumbnailUrl,
+      optimized: true
     })
   } catch (error) {
     console.error('Avatar upload error:', error)

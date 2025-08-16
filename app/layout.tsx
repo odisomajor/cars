@@ -2,7 +2,13 @@ import type { Metadata } from 'next'
 import { Inter, Poppins } from 'next/font/google'
 import './globals.css'
 import { SessionProvider } from '@/components/providers/SessionProvider'
-import { Toaster } from 'react-hot-toast'
+import { Toaster as HotToaster } from 'react-hot-toast'
+import { Toaster as SonnerToaster } from 'sonner'
+import StructuredData from '@/components/seo/StructuredData'
+import PerformanceOptimizer from '@/components/seo/PerformanceOptimizer'
+import GoogleAnalytics from '@/components/analytics/GoogleAnalytics'
+import CoreWebVitals from '@/components/analytics/CoreWebVitals'
+import Script from 'next/script'
 
 const inter = Inter({
   subsets: ['latin'],
@@ -34,7 +40,8 @@ export const metadata: Metadata = {
     'auto dealers Kenya',
     'Nairobi cars',
     'Mombasa cars',
-    'Kisumu cars'
+    'Kisumu cars',
+    'car rental Kenya'
   ],
   authors: [{ name: 'Kenya Car Marketplace Team' }],
   creator: 'Kenya Car Marketplace',
@@ -48,6 +55,7 @@ export const metadata: Metadata = {
   alternates: {
     canonical: '/',
   },
+  manifest: '/manifest.json',
   openGraph: {
     type: 'website',
     locale: 'en_KE',
@@ -85,6 +93,15 @@ export const metadata: Metadata = {
   verification: {
     google: 'your-google-verification-code',
     yandex: 'your-yandex-verification-code',
+    yahoo: 'your-yahoo-verification-code',
+  },
+  other: {
+    'msapplication-TileColor': '#3b82f6',
+    'msapplication-config': '/browserconfig.xml',
+    'apple-mobile-web-app-capable': 'yes',
+    'apple-mobile-web-app-status-bar-style': 'default',
+    'apple-mobile-web-app-title': 'CarMarket KE',
+    'mobile-web-app-capable': 'yes',
   },
 }
 
@@ -96,22 +113,9 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${inter.variable} ${poppins.variable}`}>
       <head>
-        {/* Google Analytics */}
-        <script
-          async
-          src="https://www.googletagmanager.com/gtag/js?id=GA_MEASUREMENT_ID"
-        />
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              window.dataLayer = window.dataLayer || [];
-              function gtag(){dataLayer.push(arguments);}
-              gtag('js', new Date());
-              gtag('config', 'GA_MEASUREMENT_ID');
-            `,
-          }}
-          suppressHydrationWarning={true}
-        />
+        {/* Enhanced Analytics & Performance Monitoring */}
+        <GoogleAnalytics />
+        <CoreWebVitals reportWebVitals={true} debug={process.env.NODE_ENV === 'development'} />
         
         {/* Google AdSense */}
         <script
@@ -171,11 +175,18 @@ export default function RootLayout({
         />
       </head>
       <body className="antialiased">
+        {/* <PerformanceOptimizer 
+          enableAnalytics={true}
+          enableLazyLoading={true}
+          enableImageOptimization={true}
+          enableResourceHints={true}
+        /> */}
+        <StructuredData />
         <SessionProvider>
           <div id="root">
             {children}
           </div>
-          <Toaster
+          <HotToaster
             position="top-right"
             toastOptions={{
               duration: 4000,
@@ -199,19 +210,30 @@ export default function RootLayout({
               },
             }}
           />
+          <SonnerToaster position="top-center" />
         </SessionProvider>
         
-        {/* Google AdSense Auto Ads */}
-        <script
+
+        
+        {/* Service Worker Registration */}
+        <Script
+          id="sw-registration"
+          strategy="afterInteractive"
           dangerouslySetInnerHTML={{
             __html: `
-              (adsbygoogle = window.adsbygoogle || []).push({
-                google_ad_client: "ca-pub-YOUR_ADSENSE_ID",
-                enable_page_level_ads: true
-              });
+              if ('serviceWorker' in navigator) {
+                window.addEventListener('load', function() {
+                  navigator.serviceWorker.register('/sw.js')
+                    .then(function(registration) {
+                      console.log('SW registered: ', registration);
+                    })
+                    .catch(function(registrationError) {
+                      console.log('SW registration failed: ', registrationError);
+                    });
+                });
+              }
             `,
           }}
-          suppressHydrationWarning={true}
         />
       </body>
     </html>

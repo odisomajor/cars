@@ -1,8 +1,25 @@
-# CarMarket - Car Dealership Platform
+# 🚗 Car Dealership Platform - Premium Features & Monetization
 
-A comprehensive car dealership platform built with Next.js, featuring both sales and rental listings, user authentication, and advanced search capabilities.
+A comprehensive car dealership platform with advanced premium features, monetization systems, and mobile-first design.
 
-## Features
+## 🌟 Features Overview
+
+### Premium Listing System
+- ✅ **Featured Listings Carousel** - Auto-play carousel with category filtering
+- ✅ **Premium Badges & Highlighting** - 4-tier listing system (Basic, Featured, Premium, Spotlight)
+- ✅ **Premium Rental Features** - Instant booking, priority placement, enhanced visibility
+
+### Monetization Features
+- ✅ **Analytics Dashboard** - Mobile-responsive seller analytics with performance insights
+- ✅ **Ad Placement System** - Comprehensive advertising management with mobile formats
+- ✅ **Revenue Tracking** - Real-time revenue monitoring and reporting
+- ✅ **Subscription Plans** - Tiered subscription system for rental companies
+- ✅ **Commission System** - Automated commission tracking and payment processing
+
+### Mobile Enhancements
+- ✅ **Push Notification System** - Campaign management with user preferences
+- ✅ **Mobile Ad Integration** - Native mobile ad formats with performance optimization
+- ✅ **Responsive Design** - Mobile-first approach across all components
 
 ### Core Functionality
 - **Listing Management**: Create, edit, and manage both sales and rental listings
@@ -27,8 +44,9 @@ A comprehensive car dealership platform built with Next.js, featuring both sales
 - **Database**: SQLite (development), PostgreSQL (production recommended)
 - **Authentication**: NextAuth.js
 - **File Upload**: Custom file handling with UUID naming
-- **Icons**: React Icons (Font Awesome)
+- **Icons**: React Icons (Font Awesome), Lucide React
 - **Notifications**: React Hot Toast
+- **Charts**: Recharts
 
 ## Getting Started
 

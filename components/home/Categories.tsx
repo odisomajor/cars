@@ -1,3 +1,4 @@
+'use client'
 import Link from 'next/link'
 
 export default function Categories() {
@@ -68,12 +69,12 @@ export default function Categories() {
     <section className="section-padding bg-white">
       <div className="container-custom">
         {/* Categories Section */}
-        <div className="mb-16">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl lg:text-4xl font-bold text-secondary-900 mb-4">
+        <div className="mb-12">
+          <div className="text-center mb-8">
+            <h2 className="text-2xl lg:text-3xl font-bold text-secondary-900 mb-3">
               Browse by Category
             </h2>
-            <p className="text-lg text-secondary-600 max-w-2xl mx-auto">
+            <p className="text-base text-secondary-600 max-w-2xl mx-auto">
               Find the perfect vehicle type that matches your lifestyle and needs
             </p>
           </div>
@@ -83,18 +84,18 @@ export default function Categories() {
               <Link
                 key={category.name}
                 href={category.href}
-                className="group card-hover p-6 text-center transition-all duration-300 hover:scale-105"
+                className="group card-hover p-4 text-center transition-all duration-300 hover:scale-105"
               >
-                <div className="text-6xl mb-4 group-hover:scale-110 transition-transform duration-300">
+                <div className="text-4xl mb-3 group-hover:scale-110 transition-transform duration-300">
                   {category.image}
                 </div>
-                <h3 className="text-xl font-semibold text-secondary-900 mb-2 group-hover:text-primary-600 transition-colors">
+                <h3 className="text-lg font-semibold text-secondary-900 mb-2 group-hover:text-primary-600 transition-colors">
                   {category.name}
                 </h3>
-                <p className="text-secondary-600 text-sm mb-3">
+                <p className="text-secondary-600 text-xs mb-2">
                   {category.description}
                 </p>
-                <div className="text-primary-600 font-semibold">
+                <div className="text-primary-600 font-medium text-sm">
                   {category.count} available
                 </div>
               </Link>
@@ -104,28 +105,28 @@ export default function Categories() {
 
         {/* Popular Brands Section */}
         <div>
-          <div className="text-center mb-12">
-            <h2 className="text-3xl lg:text-4xl font-bold text-secondary-900 mb-4">
+          <div className="text-center mb-8">
+            <h2 className="text-2xl lg:text-3xl font-bold text-secondary-900 mb-3">
               Popular Brands
             </h2>
-            <p className="text-lg text-secondary-600 max-w-2xl mx-auto">
+            <p className="text-base text-secondary-600 max-w-2xl mx-auto">
               Shop from the most trusted automotive brands in Kenya
             </p>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
             {popularBrands.map((brand) => (
               <Link
                 key={brand.name}
                 href={`/cars?brand=${brand.name.toLowerCase()}`}
-                className="group card-hover p-4 text-center transition-all duration-300 hover:scale-105"
+                className="group card-hover p-3 text-center transition-all duration-300 hover:scale-105"
               >
-                <div className="w-16 h-16 bg-gradient-to-br from-primary-500 to-primary-700 rounded-full flex items-center justify-center mx-auto mb-3 group-hover:shadow-lg transition-shadow">
-                  <span className="text-white font-bold text-sm">
+                <div className="w-12 h-12 bg-gradient-to-br from-primary-500 to-primary-700 rounded-full flex items-center justify-center mx-auto mb-2 group-hover:shadow-lg transition-shadow">
+                  <span className="text-white font-bold text-xs">
                     {brand.logo}
                   </span>
                 </div>
-                <h3 className="font-semibold text-secondary-900 mb-1 group-hover:text-primary-600 transition-colors text-sm">
+                <h3 className="font-medium text-secondary-900 mb-1 group-hover:text-primary-600 transition-colors text-xs">
                   {brand.name}
                 </h3>
                 <p className="text-xs text-secondary-600">
@@ -135,10 +136,10 @@ export default function Categories() {
             ))}
           </div>
 
-          <div className="text-center mt-8">
+          <div className="text-center mt-6">
             <Link
               href="/brands"
-              className="btn-outline btn-lg"
+              className="inline-flex items-center bg-white border border-primary-600 text-primary-600 hover:bg-primary-600 hover:text-white px-6 py-2 rounded-md font-medium transition-all text-sm"
             >
               View All Brands
             </Link>

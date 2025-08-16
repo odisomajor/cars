@@ -148,15 +148,15 @@ export default function FeaturedCars() {
   }
 
   return (
-    <section className="py-16 bg-secondary-50">
+    <section className="py-12 bg-secondary-50">
       <div className="container mx-auto px-4">
         {/* Section Header */}
-        <div className="flex items-center justify-between mb-12">
+        <div className="flex items-center justify-between mb-8">
           <div>
-            <h2 className="text-3xl lg:text-4xl font-bold text-secondary-900 mb-4">
+            <h2 className="text-2xl lg:text-3xl font-bold text-secondary-900 mb-2">
               Featured Cars
             </h2>
-            <p className="text-secondary-600 text-lg">
+            <p className="text-secondary-600 text-base">
               Handpicked premium vehicles from trusted dealers
             </p>
           </div>
@@ -217,7 +217,7 @@ export default function FeaturedCars() {
                         )}
 
                         {/* Car Image */}
-                        <div className="relative h-48 overflow-hidden">
+                        <div className="relative h-40 overflow-hidden">
                           <Image
                             src={car.image}
                             alt={car.title}
@@ -226,13 +226,13 @@ export default function FeaturedCars() {
                           />
                           
                           {/* Badges */}
-                          <div className="absolute top-3 left-3 flex space-x-2">
+                          <div className="absolute top-2 left-2 flex space-x-1">
                             {car.isNew && (
-                              <span className="bg-success-500 text-white px-2 py-1 rounded-full text-xs font-medium">
+                              <span className="bg-success-500 text-white px-1.5 py-0.5 rounded-full text-xs font-medium">
                                 New
                               </span>
                             )}
-                            <span className="bg-primary-600 text-white px-2 py-1 rounded-full text-xs font-medium">
+                            <span className="bg-primary-600 text-white px-1.5 py-0.5 rounded-full text-xs font-medium">
                               Featured
                             </span>
                           </div>
@@ -240,10 +240,10 @@ export default function FeaturedCars() {
                           {/* Favorite Button */}
                           <button
                             onClick={() => toggleFavorite(car.id)}
-                            className="absolute top-3 right-3 p-2 bg-white/90 rounded-full hover:bg-white transition-all"
+                            className="absolute top-2 right-2 p-1.5 bg-white/90 rounded-full hover:bg-white transition-all"
                           >
                             <Heart
-                              className={`w-4 h-4 ${
+                              className={`w-3.5 h-3.5 ${
                                 favorites.includes(car.id)
                                   ? 'fill-red-500 text-red-500'
                                   : 'text-secondary-600'
@@ -253,18 +253,18 @@ export default function FeaturedCars() {
                         </div>
 
                         {/* Car Details */}
-                        <div className="p-6">
-                          <h3 className="font-bold text-lg text-secondary-900 mb-2 group-hover:text-primary-600 transition-colors">
+                        <div className="p-4">
+                          <h3 className="font-bold text-base text-secondary-900 mb-1 group-hover:text-primary-600 transition-colors">
                             {car.title}
                           </h3>
                           
-                          <div className="flex items-center text-secondary-600 mb-3">
-                            <MapPin className="w-4 h-4 mr-1" />
-                            <span className="text-sm">{car.location}</span>
+                          <div className="flex items-center text-secondary-600 mb-2">
+                            <MapPin className="w-3.5 h-3.5 mr-1" />
+                            <span className="text-xs">{car.location}</span>
                           </div>
 
                           {/* Car Specs */}
-                          <div className="grid grid-cols-3 gap-3 mb-4 text-xs">
+                          <div className="grid grid-cols-3 gap-2 mb-3 text-xs">
                             <div className="flex items-center text-secondary-600">
                               <Calendar className="w-3 h-3 mr-1" />
                               <span>{car.year}</span>
@@ -282,7 +282,7 @@ export default function FeaturedCars() {
                           {/* Price and CTA */}
                           <div className="flex items-center justify-between">
                             <div>
-                              <p className="text-2xl font-bold text-primary-600">
+                              <p className="text-lg font-bold text-primary-600">
                                 {formatPrice(car.price)}
                               </p>
                               <p className="text-xs text-secondary-500">
@@ -291,7 +291,7 @@ export default function FeaturedCars() {
                             </div>
                             <Link
                               href={`/cars/${car.id}`}
-                              className="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all transform hover:scale-105"
+                              className="bg-primary-600 hover:bg-primary-700 text-white px-3 py-1.5 rounded-md text-xs font-medium transition-all transform hover:scale-105"
                             >
                               View Details
                             </Link>
@@ -306,14 +306,14 @@ export default function FeaturedCars() {
         </div>
 
         {/* Slide Indicators */}
-        <div className="flex justify-center mt-8 space-x-2">
+        <div className="flex justify-center mt-6 space-x-2">
           {Array.from({ length: totalSlides }).map((_, index) => (
             <button
               key={index}
               onClick={() => setCurrentSlide(index)}
-              className={`w-3 h-3 rounded-full transition-all ${
+              className={`w-2 h-2 rounded-full transition-all ${
                 index === currentSlide
-                  ? 'bg-primary-600 w-8'
+                  ? 'bg-primary-600 w-6'
                   : 'bg-secondary-300 hover:bg-secondary-400'
               }`}
             />
@@ -321,13 +321,13 @@ export default function FeaturedCars() {
         </div>
 
         {/* View All Button */}
-        <div className="text-center mt-12">
+        <div className="text-center mt-8">
           <Link
             href="/cars"
-            className="inline-flex items-center space-x-2 bg-primary-600 hover:bg-primary-700 text-white px-8 py-3 rounded-lg font-semibold transition-all transform hover:scale-105 shadow-lg hover:shadow-xl"
+            className="inline-flex items-center space-x-2 bg-primary-600 hover:bg-primary-700 text-white px-6 py-2 rounded-md font-medium transition-all transform hover:scale-105 shadow-md hover:shadow-lg text-sm"
           >
             <span>View All Cars</span>
-            <ChevronRight className="w-5 h-5" />
+            <ChevronRight className="w-4 h-4" />
           </Link>
         </div>
       </div>

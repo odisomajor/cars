@@ -6,6 +6,59 @@
 // - Vonage (formerly Nexmo)
 // - MessageBird
 
+export interface SMSOptions {
+  to: string
+  message: string
+}
+
+export async function sendSMS(options: SMSOptions): Promise<boolean> {
+  try {
+    // For development, we'll just log the SMS
+    // In production, replace this with actual SMS sending logic
+    console.log(`\n=== SMS VERIFICATION ===`)
+    console.log(`To: ${options.to}`)
+    console.log(`Message: ${options.message}`)
+    console.log(`========================\n`)
+
+    // Simulate SMS sending with Twilio (example implementation)
+    if (process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN) {
+      // Uncomment and install twilio package for production use
+      /*
+      const twilio = require('twilio')
+      const client = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN)
+      
+      await client.messages.create({
+        body: options.message,
+        from: process.env.TWILIO_PHONE_NUMBER,
+        to: options.to
+      })
+      */
+      
+      console.log('Twilio credentials found - SMS would be sent in production')
+      return true
+    }
+
+    // For development, simulate successful SMS sending
+    console.warn('SMS credentials not configured. SMS not sent.')
+    return false
+  } catch (error) {
+    console.error('Error sending SMS:', error)
+    return false
+  }
+}
+
+export async function sendVerificationSMS(phoneNumber: string, code: string): Promise<boolean> {
+  const message = generateVerificationSMSText(code)
+  return await sendSMS({
+    to: phoneNumber,
+    message
+  })
+}
+
+export function generateVerificationSMSText(code: string): string {
+  return `Your Car Dealership verification code is: ${code}. This code expires in 10 minutes. Do not share this code with anyone.`
+}
+
 export async function sendPhoneVerificationSMS(phone: string, verificationCode: string) {
   // For development, we'll just log the verification code
   // In production, replace this with actual SMS sending logic
@@ -37,6 +90,37 @@ export async function sendPhoneVerificationSMS(phone: string, verificationCode: 
   
   // For development, simulate successful sending
   return Promise.resolve({ success: true, messageId: 'dev-message-id' })
+}
+
+// Rate limiting for SMS to prevent abuse
+const smsRateLimit = new Map<string, { count: number; resetTime: number }>()
+
+export function checkSMSRateLimit(phoneNumber: string, maxAttempts: number = 3, windowMs: number = 60000): boolean {
+  const now = Date.now()
+  const key = phoneNumber
+  const record = smsRateLimit.get(key)
+  
+  if (!record || now > record.resetTime) {
+    // Reset or create new record
+    smsRateLimit.set(key, { count: 1, resetTime: now + windowMs })
+    return true
+  }
+  
+  if (record.count >= maxAttempts) {
+    return false // Rate limit exceeded
+  }
+  
+  // Increment count
+  record.count++
+  return true
+}
+
+export function getRemainingCooldown(phoneNumber: string): number {
+  const record = smsRateLimit.get(phoneNumber)
+  if (!record) return 0
+  
+  const now = Date.now()
+  return Math.max(0, record.resetTime - now)
 }
 
 export async function sendPasswordResetSMS(phone: string, resetCode: string) {

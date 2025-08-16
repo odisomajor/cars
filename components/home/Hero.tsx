@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { Search, MapPin, Calendar, Car } from 'lucide-react'
-import SearchSuggestions from '../ui/SearchSuggestions'
+import HeroSearchSuggestions from '../ui/HeroSearchSuggestions'
 
 export default function Hero() {
   const [searchMode, setSearchMode] = useState<'buy' | 'rent'>('buy')
@@ -38,7 +38,9 @@ export default function Hero() {
     '3M - 5M', '5M - 10M', 'Above 10M'
   ]
 
-  const years = Array.from({ length: 25 }, (_, i) => (new Date().getFullYear() - i).toString())
+  // Generate years array statically to avoid hydration mismatch
+  const currentYear = new Date().getFullYear()
+  const years = Array.from({ length: 25 }, (_, i) => (currentYear - i).toString())
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
@@ -112,33 +114,33 @@ export default function Hero() {
       </div>
 
       <div className="container-custom relative">
-        <div className="py-20 lg:py-32">
-          <div className="text-center mb-12">
-            <h1 className="text-4xl lg:text-6xl font-bold mb-6 text-shadow-lg">
+        <div className="py-8 lg:py-12">
+          <div className="text-center mb-6">
+            <h1 className="text-2xl lg:text-3xl font-bold mb-3 text-shadow-lg">
               Find Your Perfect Car in{' '}
               <span className="text-gradient bg-gradient-to-r from-yellow-300 to-orange-300 bg-clip-text text-transparent">
                 Kenya
               </span>
             </h1>
-            <p className="text-xl lg:text-2xl text-primary-100 max-w-3xl mx-auto leading-relaxed">
-              Browse thousands of new and used cars from trusted dealers and private sellers across Kenya. 
+            <p className="text-base lg:text-lg text-primary-100 max-w-2xl mx-auto leading-relaxed">
+              Browse thousands of cars from trusted dealers and sellers. 
               Your dream car is just a search away.
             </p>
           </div>
 
           {/* Search Form */}
           <div ref={searchRef} className="relative max-w-4xl mx-auto">
-            <div className="bg-white rounded-xl shadow-large p-6">
-              <form onSubmit={handleSearch} className="space-y-4">
+            <div className="bg-white rounded-lg shadow-lg p-3 lg:p-4">
+              <form onSubmit={handleSearch} className="space-y-3">
                 {/* Search Mode Toggle */}
-                <div className="flex justify-center mb-6">
-                  <div className="bg-secondary-100 rounded-lg p-1 flex">
+                <div className="flex justify-center mb-3">
+                  <div className="bg-gray-100 rounded-md p-1 flex">
                     <button
                       type="button"
                       onClick={() => setSearchMode('buy')}
-                      className={`px-8 py-3 rounded-md text-sm font-medium transition-all ${
+                      className={`px-4 py-1.5 rounded-sm text-xs font-medium transition-all ${
                         searchMode === 'buy'
-                          ? 'bg-primary-600 text-white shadow-md'
+                          ? 'bg-primary-600 text-white shadow-sm'
                           : 'text-secondary-600 hover:text-secondary-900'
                       }`}
                     >
@@ -147,9 +149,9 @@ export default function Hero() {
                     <button
                       type="button"
                       onClick={() => setSearchMode('rent')}
-                      className={`px-8 py-3 rounded-md text-sm font-medium transition-all ${
+                      className={`px-4 py-1.5 rounded-sm text-xs font-medium transition-all ${
                         searchMode === 'rent'
-                          ? 'bg-primary-600 text-white shadow-md'
+                          ? 'bg-primary-600 text-white shadow-sm'
                           : 'text-secondary-600 hover:text-secondary-900'
                       }`}
                     >
@@ -160,16 +162,16 @@ export default function Hero() {
 
                 {/* Condition Toggle for Buy Mode */}
                 {searchMode === 'buy' && (
-                  <div className="flex justify-center mb-6">
-                    <div className="bg-secondary-100 rounded-lg p-1 flex">
+                  <div className="flex justify-center mb-4">
+                    <div className="bg-gray-100 rounded-md p-1 flex">
                       {['all', 'new', 'used'].map((condition) => (
                         <button
                           key={condition}
                           type="button"
                           onClick={() => setSearchData(prev => ({ ...prev, condition }))}
-                          className={`px-6 py-2 rounded-md text-sm font-medium transition-all ${
+                          className={`px-4 py-1.5 rounded-sm text-sm font-medium transition-all ${
                             searchData.condition === condition
-                              ? 'bg-primary-600 text-white shadow-md'
+                              ? 'bg-primary-600 text-white shadow-sm'
                               : 'text-secondary-600 hover:text-secondary-900'
                           }`}
                         >
@@ -185,43 +187,43 @@ export default function Hero() {
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                     {/* Make/Model */}
                     <div className="relative">
-                      <label className="block text-sm font-medium text-secondary-700 mb-2">
+                      <label className="block text-xs font-medium text-secondary-600 mb-1">
                         Make or Model
                       </label>
                       <div className="relative">
-                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-secondary-400 w-5 h-5" />
+                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-secondary-400 w-4 h-4" />
                         <input
                           type="text"
                           placeholder="e.g. Toyota, Honda"
                           value={searchData.make}
                           onChange={(e) => setSearchData(prev => ({ ...prev, make: e.target.value }))}
                           onFocus={() => handleInputFocus('make')}
-                          className="w-full pl-10 pr-4 py-3 border border-secondary-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                          className="w-full pl-9 pr-3 py-2.5 border border-secondary-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all text-sm"
                         />
                       </div>
                     </div>
 
                     {/* Location */}
                     <div className="relative">
-                      <label className="block text-sm font-medium text-secondary-700 mb-2">
+                      <label className="block text-xs font-medium text-secondary-600 mb-1">
                         Location
                       </label>
                       <div className="relative">
-                        <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-secondary-400 w-5 h-5" />
+                        <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-secondary-400 w-4 h-4" />
                         <input
                           type="text"
                           placeholder="e.g. Nairobi, Mombasa"
                           value={searchData.location}
                           onChange={(e) => setSearchData(prev => ({ ...prev, location: e.target.value }))}
                           onFocus={() => handleInputFocus('location')}
-                          className="w-full pl-10 pr-4 py-3 border border-secondary-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                          className="w-full pl-9 pr-3 py-2.5 border border-secondary-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all text-sm"
                         />
                       </div>
                     </div>
 
                     {/* Price Range */}
                     <div className="relative">
-                      <label className="block text-sm font-medium text-secondary-700 mb-2">
+                      <label className="block text-xs font-medium text-secondary-600 mb-1">
                         Price Range (KSh)
                       </label>
                       <div className="flex space-x-2">
@@ -231,7 +233,7 @@ export default function Hero() {
                             placeholder="Min"
                             value={searchData.minPrice}
                             onChange={(e) => setSearchData(prev => ({ ...prev, minPrice: e.target.value }))}
-                            className="w-full px-4 py-3 border border-secondary-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                            className="w-full px-3 py-2.5 border border-secondary-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all text-sm"
                           />
                         </div>
                         <div className="relative flex-1">
@@ -240,7 +242,7 @@ export default function Hero() {
                             placeholder="Max"
                             value={searchData.maxPrice}
                             onChange={(e) => setSearchData(prev => ({ ...prev, maxPrice: e.target.value }))}
-                            className="w-full px-4 py-3 border border-secondary-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                            className="w-full px-3 py-2.5 border border-secondary-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all text-sm"
                           />
                         </div>
                       </div>
@@ -248,18 +250,18 @@ export default function Hero() {
 
                     {/* Year */}
                     <div className="relative">
-                      <label className="block text-sm font-medium text-secondary-700 mb-2">
+                      <label className="block text-xs font-medium text-secondary-600 mb-1">
                         Year
                       </label>
                       <div className="relative">
-                        <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-secondary-400 w-5 h-5" />
+                        <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-secondary-400 w-4 h-4" />
                         <select
                           value={searchData.year}
                           onChange={(e) => setSearchData(prev => ({ ...prev, year: e.target.value }))}
-                          className="w-full pl-10 pr-4 py-3 border border-secondary-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all appearance-none bg-white"
+                          className="w-full pl-9 pr-3 py-2.5 border border-secondary-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all appearance-none bg-white text-sm"
                         >
                           <option value="">Any Year</option>
-                          {Array.from({ length: 25 }, (_, i) => new Date().getFullYear() - i).map(year => (
+                          {years.map(year => (
                             <option key={year} value={year}>{year}</option>
                           ))}
                         </select>
@@ -270,67 +272,67 @@ export default function Hero() {
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                     {/* Pickup Location */}
                     <div className="relative">
-                      <label className="block text-sm font-medium text-secondary-700 mb-2">
+                      <label className="block text-xs font-medium text-secondary-600 mb-1">
                         Pickup Location
                       </label>
                       <div className="relative">
-                        <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-secondary-400 w-5 h-5" />
+                        <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-secondary-400 w-4 h-4" />
                         <input
                           type="text"
                           placeholder="e.g. Nairobi, Mombasa"
                           value={searchData.location}
                           onChange={(e) => setSearchData(prev => ({ ...prev, location: e.target.value }))}
                           onFocus={() => handleInputFocus('location')}
-                          className="w-full pl-10 pr-4 py-3 border border-secondary-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                          className="w-full pl-9 pr-3 py-2.5 border border-secondary-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all text-sm"
                         />
                       </div>
                     </div>
 
                     {/* Pickup Date */}
                     <div className="relative">
-                      <label className="block text-sm font-medium text-secondary-700 mb-2">
+                      <label className="block text-xs font-medium text-secondary-600 mb-1">
                         Pickup Date
                       </label>
                       <div className="relative">
-                        <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-secondary-400 w-5 h-5" />
+                        <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-secondary-400 w-4 h-4" />
                         <input
                           type="date"
                           value={searchData.pickupDate}
                           onChange={(e) => setSearchData(prev => ({ ...prev, pickupDate: e.target.value }))}
                           min={new Date().toISOString().split('T')[0]}
-                          className="w-full pl-10 pr-4 py-3 border border-secondary-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                          className="w-full pl-9 pr-3 py-2.5 border border-secondary-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all text-sm"
                         />
                       </div>
                     </div>
 
                     {/* Return Date */}
                     <div className="relative">
-                      <label className="block text-sm font-medium text-secondary-700 mb-2">
+                      <label className="block text-xs font-medium text-secondary-600 mb-1">
                         Return Date
                       </label>
                       <div className="relative">
-                        <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-secondary-400 w-5 h-5" />
+                        <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-secondary-400 w-4 h-4" />
                         <input
                           type="date"
                           value={searchData.returnDate}
                           onChange={(e) => setSearchData(prev => ({ ...prev, returnDate: e.target.value }))}
                           min={searchData.pickupDate || new Date().toISOString().split('T')[0]}
-                          className="w-full pl-10 pr-4 py-3 border border-secondary-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                          className="w-full pl-9 pr-3 py-2.5 border border-secondary-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all text-sm"
                         />
                       </div>
                     </div>
 
                     {/* Category */}
                     <div className="relative">
-                      <label className="block text-sm font-medium text-secondary-700 mb-2">
+                      <label className="block text-xs font-medium text-secondary-600 mb-1">
                         Category
                       </label>
                       <div className="relative">
-                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-secondary-400 w-5 h-5" />
+                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-secondary-400 w-4 h-4" />
                         <select
                           value={searchData.category}
                           onChange={(e) => setSearchData(prev => ({ ...prev, category: e.target.value }))}
-                          className="w-full pl-10 pr-4 py-3 border border-secondary-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all appearance-none bg-white"
+                          className="w-full pl-9 pr-3 py-2.5 border border-secondary-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all appearance-none bg-white text-sm"
                         >
                           <option value="">Any Category</option>
                           <option value="economy">Economy</option>
@@ -347,12 +349,12 @@ export default function Hero() {
                 )}
 
                 {/* Search Button */}
-                <div className="flex justify-center pt-4">
+                <div className="flex justify-center pt-3">
                   <button
                     type="submit"
-                    className="bg-primary-600 hover:bg-primary-700 text-white px-8 py-3 rounded-lg font-semibold transition-all transform hover:scale-105 shadow-lg hover:shadow-xl flex items-center space-x-2"
+                    className="bg-primary-600 hover:bg-primary-700 text-white px-6 py-2.5 rounded-md font-medium transition-all transform hover:scale-105 shadow-md hover:shadow-lg flex items-center space-x-2 text-sm"
                   >
-                    <Search className="w-5 h-5" />
+                    <Search className="w-4 h-4" />
                     <span>{searchMode === 'buy' ? 'Search Cars' : 'Search Rentals'}</span>
                   </button>
                 </div>
@@ -360,7 +362,7 @@ export default function Hero() {
 
               {/* Search Suggestions */}
               {showSuggestions && activeField && (
-                <SearchSuggestions
+                <HeroSearchSuggestions
                   query={searchData[activeField as keyof typeof searchData] as string}
                   isVisible={showSuggestions}
                   onSelect={handleSuggestionSelect}
@@ -371,7 +373,7 @@ export default function Hero() {
           </div>
 
           {/* Quick Stats */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 mt-16 max-w-4xl mx-auto">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-12 max-w-4xl mx-auto">
             {[
               { number: '12,450+', label: 'Cars Available' },
               { number: '850+', label: 'Trusted Dealers' },
@@ -379,10 +381,10 @@ export default function Hero() {
               { number: '25,000+', label: 'Happy Customers' },
             ].map((stat, index) => (
               <div key={index} className="text-center">
-                <div className="text-3xl lg:text-4xl font-bold text-white mb-2">
+                <div className="text-2xl lg:text-3xl font-bold text-white mb-1">
                   {stat.number}
                 </div>
-                <div className="text-primary-200 text-sm lg:text-base">
+                <div className="text-primary-200 text-xs lg:text-sm">
                   {stat.label}
                 </div>
               </div>

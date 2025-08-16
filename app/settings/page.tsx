@@ -35,7 +35,29 @@ export default function SettingsPage() {
     pushNotifications: true,
     marketingEmails: false,
     listingUpdates: true,
-    favoriteAlerts: true
+    favoriteAlerts: true,
+    // Enhanced push notification preferences
+    preferences: {
+      premium_upgrade: true,
+      booking_confirmed: true,
+      payment_success: true,
+      listing_featured: true,
+      inquiry_received: true,
+      rental_reminder: true,
+      promotion: false,
+      system: true
+    },
+    channels: {
+      push: true,
+      email: true,
+      sms: false
+    },
+    quietHours: {
+      enabled: true,
+      startTime: '22:00',
+      endTime: '08:00'
+    },
+    frequency: 'immediate' as 'immediate' | 'hourly' | 'daily' | 'weekly'
   })
 
   // Initialize profile data when user data is available
@@ -454,11 +476,15 @@ export default function SettingsPage() {
 
             {/* Notifications Tab */}
             {activeTab === 'notifications' && (
-              <div className="space-y-6">
+              <div className="space-y-8">
                 <h3 className="text-lg font-medium text-gray-900">Notification Preferences</h3>
                 
+                {/* Basic Notification Settings */}
                 <div className="space-y-4">
-                  {Object.entries(notificationSettings).map(([key, value]) => {
+                  <h4 className="font-medium text-gray-900">General Settings</h4>
+                  {Object.entries(notificationSettings).filter(([key]) => 
+                    ['emailNotifications', 'pushNotifications', 'marketingEmails', 'listingUpdates', 'favoriteAlerts'].includes(key)
+                  ).map(([key, value]) => {
                     const labels = {
                       emailNotifications: 'Email Notifications',
                       pushNotifications: 'Push Notifications',
@@ -470,7 +496,7 @@ export default function SettingsPage() {
                     return (
                       <div key={key} className="flex items-center justify-between">
                         <div>
-                          <h4 className="font-medium text-gray-900">{labels[key as keyof typeof labels]}</h4>
+                          <h5 className="font-medium text-gray-900">{labels[key as keyof typeof labels]}</h5>
                           <p className="text-sm text-gray-600">
                             {key === 'emailNotifications' && 'Receive important updates via email'}
                             {key === 'pushNotifications' && 'Get instant notifications on your device'}
@@ -482,7 +508,7 @@ export default function SettingsPage() {
                         <label className="relative inline-flex items-center cursor-pointer">
                           <input
                             type="checkbox"
-                            checked={value}
+                            checked={value as boolean}
                             onChange={(e) => setNotificationSettings({ ...notificationSettings, [key]: e.target.checked })}
                             className="sr-only peer"
                           />
@@ -491,6 +517,228 @@ export default function SettingsPage() {
                       </div>
                     )
                   })}
+                </div>
+
+                {/* Push Notification Categories */}
+                <div className="space-y-4">
+                  <h4 className="font-medium text-gray-900">Push Notification Types</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {Object.entries(notificationSettings.preferences).map(([key, enabled]) => {
+                      const labels = {
+                        premium_upgrade: 'Premium Upgrades',
+                        booking_confirmed: 'Booking Confirmations',
+                        payment_success: 'Payment Success',
+                        listing_featured: 'Featured Listings',
+                        inquiry_received: 'New Inquiries',
+                        rental_reminder: 'Rental Reminders',
+                        promotion: 'Promotions & Offers',
+                        system: 'System Updates'
+                      }
+                      
+                      const descriptions = {
+                        premium_upgrade: 'Notifications about premium features and upgrades',
+                        booking_confirmed: 'Confirmations for successful bookings',
+                        payment_success: 'Payment completion notifications',
+                        listing_featured: 'When your listings are featured',
+                        inquiry_received: 'New inquiries on your listings',
+                        rental_reminder: 'Upcoming rental reminders',
+                        promotion: 'Special offers and promotional content',
+                        system: 'Important system updates and maintenance'
+                      }
+                      
+                      return (
+                        <div key={key} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                          <div>
+                            <h5 className="font-medium text-gray-900">{labels[key as keyof typeof labels]}</h5>
+                            <p className="text-sm text-gray-600">{descriptions[key as keyof typeof descriptions]}</p>
+                          </div>
+                          <label className="relative inline-flex items-center cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={enabled}
+                              onChange={(e) => setNotificationSettings({
+                                ...notificationSettings,
+                                preferences: { ...notificationSettings.preferences, [key]: e.target.checked }
+                              })}
+                              className="sr-only peer"
+                            />
+                            <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
+                          </label>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+
+                {/* Delivery Channels */}
+                <div className="space-y-4">
+                  <h4 className="font-medium text-gray-900">Delivery Channels</h4>
+                  <div className="space-y-3">
+                    {Object.entries(notificationSettings.channels).map(([channel, enabled]) => {
+                      const channelLabels = {
+                        push: 'Push Notifications',
+                        email: 'Email Notifications',
+                        sms: 'SMS Notifications'
+                      }
+                      
+                      const channelDescriptions = {
+                        push: 'Instant notifications on your device',
+                        email: 'Notifications sent to your email address',
+                        sms: 'Text message notifications to your phone'
+                      }
+                      
+                      const channelIcons = {
+                        push: '📱',
+                        email: '📧',
+                        sms: '💬'
+                      }
+                      
+                      return (
+                        <div key={channel} className="flex items-center justify-between">
+                          <div className="flex items-center space-x-3">
+                            <span className="text-lg">{channelIcons[channel as keyof typeof channelIcons]}</span>
+                            <div>
+                              <h5 className="font-medium text-gray-900">{channelLabels[channel as keyof typeof channelLabels]}</h5>
+                              <p className="text-sm text-gray-600">{channelDescriptions[channel as keyof typeof channelDescriptions]}</p>
+                            </div>
+                          </div>
+                          <label className="relative inline-flex items-center cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={enabled}
+                              onChange={(e) => setNotificationSettings({
+                                ...notificationSettings,
+                                channels: { ...notificationSettings.channels, [channel]: e.target.checked }
+                              })}
+                              className="sr-only peer"
+                            />
+                            <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
+                          </label>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+
+                {/* Quiet Hours */}
+                <div className="space-y-4">
+                  <h4 className="font-medium text-gray-900">Quiet Hours</h4>
+                  <div className="bg-gray-50 rounded-lg p-4 space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h5 className="font-medium text-gray-900">Enable Quiet Hours</h5>
+                        <p className="text-sm text-gray-600">Pause notifications during specified hours</p>
+                      </div>
+                      <label className="relative inline-flex items-center cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={notificationSettings.quietHours.enabled}
+                          onChange={(e) => setNotificationSettings({
+                            ...notificationSettings,
+                            quietHours: { ...notificationSettings.quietHours, enabled: e.target.checked }
+                          })}
+                          className="sr-only peer"
+                        />
+                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
+                      </label>
+                    </div>
+                    
+                    {notificationSettings.quietHours.enabled && (
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label htmlFor="start-time" className="block text-sm font-medium text-gray-700 mb-1">
+                            Start Time
+                          </label>
+                          <input
+                            id="start-time"
+                            type="time"
+                            value={notificationSettings.quietHours.startTime}
+                            onChange={(e) => setNotificationSettings({
+                              ...notificationSettings,
+                              quietHours: { ...notificationSettings.quietHours, startTime: e.target.value }
+                            })}
+                            className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+                          />
+                        </div>
+                        
+                        <div>
+                          <label htmlFor="end-time" className="block text-sm font-medium text-gray-700 mb-1">
+                            End Time
+                          </label>
+                          <input
+                            id="end-time"
+                            type="time"
+                            value={notificationSettings.quietHours.endTime}
+                            onChange={(e) => setNotificationSettings({
+                              ...notificationSettings,
+                              quietHours: { ...notificationSettings.quietHours, endTime: e.target.value }
+                            })}
+                            className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+                          />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Notification Frequency */}
+                <div className="space-y-4">
+                  <h4 className="font-medium text-gray-900">Notification Frequency</h4>
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <select 
+                      value={notificationSettings.frequency}
+                      onChange={(e) => setNotificationSettings({
+                        ...notificationSettings,
+                        frequency: e.target.value as 'immediate' | 'hourly' | 'daily' | 'weekly'
+                      })}
+                      className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+                    >
+                      <option value="immediate">Immediate</option>
+                      <option value="hourly">Hourly Digest</option>
+                      <option value="daily">Daily Digest</option>
+                      <option value="weekly">Weekly Digest</option>
+                    </select>
+                    <p className="text-sm text-gray-600 mt-2">
+                      {notificationSettings.frequency === 'immediate' && 'Receive notifications as they happen'}
+                      {notificationSettings.frequency === 'hourly' && 'Receive a summary of notifications every hour'}
+                      {notificationSettings.frequency === 'daily' && 'Receive a daily summary of notifications'}
+                      {notificationSettings.frequency === 'weekly' && 'Receive a weekly summary of notifications'}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Save Button */}
+                <div className="pt-6 border-t border-gray-200">
+                  <button
+                    onClick={async () => {
+                      setLoading(true)
+                      try {
+                        const response = await fetch('/api/user/notification-settings', {
+                          method: 'PUT',
+                          headers: {
+                            'Content-Type': 'application/json',
+                          },
+                          body: JSON.stringify(notificationSettings),
+                        })
+
+                        if (response.ok) {
+                          toast.success('Notification settings updated successfully!')
+                        } else {
+                          const data = await response.json()
+                          toast.error(data.error || 'Failed to update notification settings')
+                        }
+                      } catch (error) {
+                        toast.error('Something went wrong. Please try again.')
+                      } finally {
+                        setLoading(false)
+                      }
+                    }}
+                    disabled={loading}
+                    className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50"
+                  >
+                    <Save className="w-4 h-4 mr-2" />
+                    {loading ? 'Saving...' : 'Save Notification Settings'}
+                  </button>
                 </div>
               </div>
             )}
